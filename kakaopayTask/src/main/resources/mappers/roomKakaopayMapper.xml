@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="kakaopay.task.mapper.roomKakaopayMapper">
+   
+    <select id="selectSendRoomKakaopay" resultType="SendRoomKakaopayVO">
+        SELECT roomid
+        	 , userid
+        	 , sendAmount
+        	 , sendToken
+        	 , count
+        	 , date
+        FROM sendRoomKakaopay
+        WHERE roomid = #{roomid}
+        AND sendToken = #{sendToken}
+    </select>
+    
+    <insert id="insertSendRoomKakaopay" parameterType="SendRoomKakaopayVO" >
+        INSERT INTO sendRoomKakaopay (roomid, userid, sendAmount, sendToken, count, date)
+        VALUES (#{roomid},#{userid},#{sendAmount},#{sendToken},#{count},#{date})
+    </insert>
+    
+    <insert id="insertReceiveRoomKakaopay" parameterType="ReceiveRoomKakaopayVO" >
+        INSERT INTO receiveRoomKakaopay(roomid, sendToken, amount, seq, sendDate) 
+        VALUES (#{roomid},#{sendToken},#{amount},#{seq}, #{sendDate})        
+    </insert>    
+    
+    <update id="subtractKakaopay" parameterType="SendRoomKakaopayVO">
+	    UPDATE remainKakaopay
+	    SET remainpay = remainpay - #{sendAmount}
+	    WHERE userid = #{userid}
+	</update>
+	
+	<update id="plusKakaopay" parameterType="receiveRoomKakaopayVO">
+	    UPDATE remainKakaopay
+	    SET remainpay = remainpay + #{amount}
+	    WHERE userid = #{userid}
+	</update>
+	
+	<select id="selectSendReceiveKakaopay" resultType="SendReceiveKakaopayVO">
+		SELECT 'sendRoomKakaopay' AS tablename
+				, userid
+				, roomid
+				, sendToken
+				, sendAmount AS amount
+		FROM sendroomkakaopay
+		WHERE userid = #{userid}
+		AND roomid = #{roomid}
+		AND sendToken = #{sendToken}
+		UNION
+		SELECT 'recevieroomKakaopay' AS tablename
+			, userid
+			, roomid
+			, sendToken
+			, amount AS amount
+		FROM receiveroomkakaopay
+		WHERE userid = #{userid}
+		AND roomid = #{roomid}
+		AND sendToken = #{sendToken}
+	</select>
+	
+	<select id="selectReceiveRoomKakaopay" resultType="ReceiveRoomKakaopayVO">
+        SELECT roomid
+        	 , concat(#{userid}) as userid
+        	 , sendToken
+        	 , amount
+        	 , seq
+        	 , sendDate
+        FROM receiveRoomKakaopay
+        WHERE roomid = #{roomid}
+        AND sendToken = #{sendToken}
+        AND userid is null
+        ORDER BY seq        
+    </select>
+	
+	<update id="updateReceiveRoomKakaopay" parameterType="ReceiveRoomKakaopayVO">
+	    UPDATE receiveRoomKakaopay
+	    SET userid = #{userid}
+	    	, receiveDate = now()
+	    WHERE roomid = #{roomid}
+	    AND sendToken = #{sendToken}
+	    AND seq = #{seq}
+	    AND userid is null
+	</update>
+	
+	<select id="searchRoomKakaopayBaseInfo" resultType="SearchRoomKakaopayInfoData">
+        SELECT MAX(SR.date) AS sendDate
+	     	, MAX(SR.sendAmount) AS sendAmount
+	     	, SUM(RR.amount) AS receiveAmount
+		FROM sendroomkakaopay AS SR JOIN receiveroomkakaopay AS RR 
+			ON SR.roomid = RR.roomid AND SR.sendToken = RR.sendToken 
+		WHERE SR.userid = #{userid}
+		AND SR.sendToken = #{sendToken}
+		AND SR.roomid = #{roomid}
+		AND RR.userid IS NOT NULL
+		AND SR.date >= DATE_ADD(STR_TO_DATE(DATE_FORMAT(NOW(),'%Y%m%d'),'%Y%m%d'), INTERVAL -7 DAY)
+		GROUP BY SR.roomid, SR.sendToken        
+    </select>
+    
+    <select id="searchRoomKakaopaydetailesInfo" resultType="ReceiveUserAmountVO">
+        SELECT amount
+		     , userid
+		FROM receiveroomkakaopay
+		WHERE sendToken = 'MYM'
+		AND roomid = 'KAKAO1'
+		AND userid IS NOT NULL       
+    </select>
+    
+</mapper>

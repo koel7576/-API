@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration 
+    PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-config.dtd">
+    <configuration>
+    
+        <typeAliases>
+            <typeAlias type="kakaopay.task.dto.SendRoomKakaopayVO" alias="SendRoomKakaopayVO"/>
+            <typeAlias type="kakaopay.task.dto.ReceiveRoomKakaopayVO" alias="ReceiveRoomKakaopayVO"/>
+            <typeAlias type="kakaopay.task.dto.SendReceiveKakaopayVO" alias="SendReceiveKakaopayVO"/>
+            <typeAlias type="kakaopay.task.dto.SearchRoomKakaopayInfoData" alias="SearchRoomKakaopayInfoData"/>
+            <typeAlias type="kakaopay.task.dto.ReceiveUserAmountVO" alias="ReceiveUserAmountVO"/>
+        </typeAliases>
+    	
+    </configuration>
